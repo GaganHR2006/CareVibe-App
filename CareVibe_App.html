@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#060b18"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="CareVibe"/>
+  <title>CareVibe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#060b18;--surface:#0d1526;--surface2:#111d35;
+      --border:rgba(99,179,255,0.12);
+      --blue:#4da6ff;--blue-dim:rgba(77,166,255,0.15);
+      --green:#00e5a0;--green-dim:rgba(0,229,160,0.12);
+      --red:#ff4d6d;--red-dim:rgba(255,77,109,0.15);
+      --amber:#ffb627;--amber-dim:rgba(255,182,39,0.12);
+      --text:#e8f0fe;--text-muted:#7b8fb0;
+      --mono:'Space Mono',monospace;--head:'Syne',sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--head);overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(77,166,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(77,166,255,0.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
+    #app{position:relative;z-index:1;max-width:430px;margin:0 auto;padding:0 0 90px;min-height:100vh;}
+    .hdr{display:flex;align-items:center;justify-content:space-between;padding:52px 20px 16px;}
+    .logo{display:flex;align-items:center;gap:10px;}
+    .logo-icon{width:36px;height:36px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+    .logo-text{font-size:20px;font-weight:800;letter-spacing:-0.5px;}
+    .logo-text span{color:var(--blue);}
+    .badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;transition:all 0.3s;}
+    .badge.online{color:var(--green);border-color:rgba(0,229,160,0.3);}
+    .badge.offline{color:var(--red);border-color:rgba(255,77,109,0.3);}
+    .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pdot 2s infinite;}
+    @keyframes pdot{0%,100%{opacity:1;}50%{opacity:0.3;}}
+    #alert-banner{margin:0 16px 12px;background:var(--red-dim);border:1px solid var(--red);border-radius:14px;padding:14px 16px;display:none;animation:shake 0.4s ease;}
+    #alert-banner.visible{display:block;}
+    @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+    .a-hdr{font-size:13px;font-weight:700;color:var(--red);letter-spacing:1px;margin-bottom:6px;}
+    .a-lbl{font-family:var(--mono);font-size:12px;color:var(--text);}
+    .sec{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;padding:0 20px;margin:20px 0 10px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;}
+    .grid.single{grid-template-columns:1fr;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;position:relative;overflow:hidden;transition:border-color 0.3s,background 0.3s;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ca,transparent);border-radius:16px 16px 0 0;}
+    .card.alert-card{border-color:var(--red);background:var(--red-dim);}
+    .c-icon{font-size:20px;margin-bottom:10px;display:block;}
+    .c-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;}
+    .c-val{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text);line-height:1;transition:color 0.3s;}
+    .c-val.g{color:var(--green)}.c-val.b{color:var(--blue)}.c-val.r{color:var(--red)}.c-val.a{color:var(--amber)}.c-val.m{color:var(--text-muted);font-size:14px;}
+    .c-unit{font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:4px;}
+    .c-stat{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:0.5px;margin-top:8px;padding:3px 8px;border-radius:20px;background:var(--green-dim);color:var(--green);}
+    .c-stat.w{background:var(--amber-dim);color:var(--amber);}
+    .c-stat.d{background:var(--red-dim);color:var(--red);}
+    .hr-card{grid-column:span 2;--ca:var(--red);}
+    .hr-vis{display:flex;align-items:center;gap:16px;margin-top:4px;}
+    .hr-num{font-family:var(--mono);font-size:48px;font-weight:700;color:var(--red);line-height:1;}
+    .hr-bars{display:flex;align-items:flex-end;gap:3px;height:40px;flex:1;}
+    .hb{flex:1;background:rgba(255,77,109,0.3);border-radius:3px;transition:height 0.4s ease;}
+    .gps-card{grid-column:span 2;--ca:var(--blue);}
+    .gps-co{font-family:var(--mono);font-size:13px;color:var(--blue);margin-top:6px;line-height:1.8;}
+    .maps-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:9px 16px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:10px;color:var(--blue);font-size:12px;font-weight:700;letter-spacing:0.5px;text-decoration:none;transition:background 0.2s;cursor:pointer;}
+    .maps-btn.dis{opacity:0.3;pointer-events:none;}
+    .info-bar{margin:12px 16px 0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+    .ii{text-align:center;}
+    .iv{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:700;}
+    .il{font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-top:2px;}
+    .idiv{width:1px;height:28px;background:var(--border);}
+    nav.bot{position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:rgba(6,11,24,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:10px 0 24px;z-index:100;}
+    .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;cursor:pointer;transition:color 0.2s;padding:6px 0;}
+    .ni.active{color:var(--blue);}
+    .ni-ic{font-size:20px;}
+    .page{display:none;}
+    .page.active{display:block;}
+    .log-entry{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:12px;padding:14px 16px;margin-bottom:10px;animation:sli 0.3s ease;}
+    @keyframes sli{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .lt{font-size:12px;font-weight:700;color:var(--red);letter-spacing:0.5px;}
+    .lm{font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:4px;}
+    .lg{font-family:var(--mono);font-size:11px;color:var(--blue);margin-top:4px;}
+    .empty{text-align:center;padding:60px 20px;color:var(--text-muted);}
+    .ei{font-size:48px;margin-bottom:12px;}
+    .et{font-size:14px;}
+    .sc{padding:0 16px;}
+    .scard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px;}
+    .sr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
+    .sr:last-child{border-bottom:none;}
+    .sk{font-size:13px;color:var(--text);font-weight:600;}
+    .sv{font-family:var(--mono);font-size:12px;color:var(--blue);}
+    .rrow{display:flex;align-items:center;justify-content:flex-end;padding:0 20px;margin-bottom:8px;}
+    .rt{font-family:var(--mono);font-size:10px;color:var(--text-muted);}
+    .snd-bars{display:flex;align-items:flex-end;gap:2px;height:24px;margin-top:8px;}
+    .sb{flex:1;border-radius:2px;background:rgba(0,229,160,0.3);transition:height 0.2s ease;min-height:2px;}
+    #cfg-modal{position:fixed;inset:0;background:rgba(6,11,24,0.97);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+    #cfg-modal.hidden{display:none;}
+    .cfg-box{background:var(--surface2);border:1px solid var(--blue);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;}
+    .cfg-t{font-size:20px;font-weight:800;color:var(--blue);margin-bottom:6px;}
+    .cfg-s{font-size:12px;color:var(--text-muted);margin-bottom:24px;line-height:1.5;}
+    .cfg-f{margin-bottom:16px;}
+    .cfg-l{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;}
+    .cfg-i{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;transition:border-color 0.2s;}
+    .cfg-i:focus{border-color:var(--blue);}
+    .cfg-btn{width:100%;padding:14px;background:var(--blue);border:none;border-radius:12px;color:#fff;font-family:var(--head);font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.2s;}
+    .cfg-btn:hover{opacity:0.85;}
+  </style>
+</head>
+<body>
+
+<div id="cfg-modal">
+  <div class="cfg-box">
+    <div class="cfg-t">Connect CareVibe</div>
+    <div class="cfg-s">Enter your Firebase Realtime Database URL to start monitoring your device in real time.</div>
+    <div class="cfg-f">
+      <div class="cfg-l">Firebase Database URL</div>
+      <input class="cfg-i" id="inp-url" type="url" placeholder="https://carevibe-xxxxx-default-rtdb.asia-southeast1.firebasedatabase.app/" autocomplete="off" autocorrect="off" spellcheck="false"/>
+    </div>
+    <div class="cfg-f">
+      <div class="cfg-l">Device ID (from config.h)</div>
+      <input class="cfg-i" id="inp-dev" type="text" placeholder="carevibe_01" value="carevibe_01"/>
+    </div>
+    <button class="cfg-btn" onclick="saveConfig()">Start Monitoring →</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="hdr">
+    <div class="logo">
+      <div class="logo-icon">💓</div>
+      <div class="logo-text">Care<span>Vibe</span></div>
+    </div>
+    <div class="badge" id="badge"><span class="dot"></span><span id="badge-txt">connecting</span></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div id="alert-banner"><div class="a-hdr">⚠ EMERGENCY ALERT</div><div class="a-lbl" id="a-lbl">—</div></div>
+    <div class="rrow"><span class="rt" id="rt">—</span></div>
+
+    <div class="sec">Vitals</div>
+    <div class="grid">
+      <div class="card hr-card" id="card-hr">
+        <div class="c-lbl">❤ Heart Rate</div>
+        <div class="hr-vis">
+          <div><div class="hr-num" id="v-hr">—</div><div class="c-unit">BPM</div></div>
+          <div class="hr-bars" id="hr-bars">
+            <div class="hb" style="height:30%"></div><div class="hb" style="height:60%"></div>
+            <div class="hb" style="height:40%"></div><div class="hb" style="height:90%"></div>
+            <div class="hb" style="height:55%"></div><div class="hb" style="height:70%"></div>
+            <div class="hb" style="height:45%"></div><div class="hb" style="height:80%"></div>
+          </div>
+        </div>
+        <div class="c-stat" id="st-hr">● NORMAL</div>
+      </div>
+
+      <div class="card" style="--ca:var(--amber)">
+        <span class="c-icon">🌡</span>
+        <div class="c-lbl">Temperature</div>
+        <div class="c-val a" id="v-temp">—</div>
+        <div class="c-unit">°C</div>
+        <div class="c-stat" id="st-temp">● NORMAL</div>
+      </div>
+
+      <div class="card" style="--ca:var(--blue)">
+        <span class="c-icon">📳</span>
+        <div class="c-lbl">Motion / G-Force</div>
+        <div class="c-val b" id="v-accel">—</div>
+        <div class="c-unit">g</div>
+        <div class="c-stat" id="st-accel">● STABLE</div>
+      </div>
+    </div>
+
+    <div class="sec">Environment</div>
+    <div class="grid">
+      <div class="card" style="--ca:var(--green)">
+        <span class="c-icon">🎙</span>
+        <div class="c-lbl">Sound Level</div>
+        <div class="c-val g" id="v-sound">—</div>
+        <div class="snd-bars" id="snd-bars">
+          <div class="sb" style="height:40%"></div><div class="sb" style="height:70%"></div>
+          <div class="sb" style="height:30%"></div><div class="sb" style="height:55%"></div>
+          <div class="sb" style="height:80%"></div><div class="sb" style="height:45%"></div>
+          <div class="sb" style="height:60%"></div><div class="sb" style="height:35%"></div>
+        </div>
+      </div>
+      <div class="card" style="--ca:var(--blue)">
+        <span class="c-icon">📡</span>
+        <div class="c-lbl">WiFi Signal</div>
+        <div class="c-val b" id="v-rssi">—</div>
+        <div class="c-unit">dBm</div>
+        <div class="c-stat" id="st-rssi">● OK</div>
+      </div>
+    </div>
+
+    <div class="sec">Location</div>
+    <div class="grid single">
+      <div class="card gps-card">
+        <div class="c-lbl">📍 GPS Location</div>
+        <div class="gps-co" id="gps-co">Waiting for GPS fix…</div>
+        <a class="maps-btn dis" id="maps-btn" href="#" target="_blank">🗺 Open in Google Maps</a>
+      </div>
+    </div>
+
+    <div class="info-bar">
+      <div class="ii"><div class="iv" id="i-uptime">—</div><div class="il">Uptime</div></div>
+      <div class="idiv"></div>
+      <div class="ii"><div class="iv" id="i-sats">—</div><div class="il">Sats</div></div>
+      <div class="idiv"></div>
+      <div class="ii"><div class="iv" id="i-finger">—</div><div class="il">Finger</div></div>
+      <div class="idiv"></div>
+      <div class="ii"><div class="iv" id="i-alert" style="color:var(--green)">NONE</div><div class="il">Alert</div></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history">
+    <div class="hdr" style="padding-top:52px;padding-bottom:0">
+      <div style="font-size:18px;font-weight:800">Alert History</div>
+      <button onclick="clearLog()" style="background:var(--red-dim);border:1px solid var(--red);color:var(--red);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;">Clear</button>
+    </div>
+    <div class="sec">Recent Alerts</div>
+    <div style="padding:0 16px" id="alert-log">
+      <div class="empty"><div class="ei">✅</div><div class="et">No alerts — all clear!</div></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="hdr" style="padding-top:52px;padding-bottom:0">
+      <div style="font-size:18px;font-weight:800">Settings</div>
+    </div>
+    <div class="sec">Device</div>
+    <div class="sc">
+      <div class="scard">
+        <div class="sr"><div class="sk">Device ID</div><div class="sv" id="s-dev">—</div></div>
+        <div class="sr"><div class="sk">Database URL</div><div class="sv" id="s-url" style="font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div></div>
+        <div class="sr"><div class="sk">Refresh Rate</div><div class="sv">10 seconds</div></div>
+      </div>
+    </div>
+    <div class="sec">Alert Thresholds</div>
+    <div class="sc">
+      <div class="scard">
+        <div class="sr"><div class="sk">Heart Rate Low</div><div class="sv">&lt;50 BPM</div></div>
+        <div class="sr"><div class="sk">Heart Rate High</div><div class="sv">&gt;120 BPM</div></div>
+        <div class="sr"><div class="sk">Temperature</div><div class="sv">&gt;38.0 °C</div></div>
+        <div class="sr"><div class="sk">Fall Detection</div><div class="sv">&gt;2.5 g</div></div>
+      </div>
+    </div>
+    <div class="sec">Actions</div>
+    <div class="sc">
+      <div class="scard">
+        <div class="sr" onclick="showCfg()" style="cursor:pointer"><div class="sk">🔗 Reconnect Device</div><div class="sv">→</div></div>
+        <div class="sr" onclick="clearLog()" style="cursor:pointer"><div class="sk">🗑 Clear Alert History</div><div class="sv" style="color:var(--red)">Clear</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="bot">
+  <div class="ni active" id="nav-dashboard" onclick="showPage('dashboard')"><span class="ni-ic">📊</span><span>Monitor</span></div>
+  <div class="ni" id="nav-history" onclick="showPage('history')"><span class="ni-ic">🔔</span><span>Alerts</span></div>
+  <div class="ni" id="nav-settings" onclick="showPage('settings')"><span class="ni-ic">⚙️</span><span>Settings</span></div>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const SK='cv_cfg';
+let fbApp=null,fbDb=null,devId='carevibe_01',aLog=[];
+
+window.addEventListener('load',()=>{
+  const s=localStorage.getItem(SK);
+  if(s){try{const c=JSON.parse(s);devId=c.d||'carevibe_01';init(c.u,c.d);hide('cfg-modal');updSet(c.u,c.d);}catch(e){}}
+});
+
+function saveConfig(){
+  const u=document.getElementById('inp-url').value.trim();
+  const d=document.getElementById('inp-dev').value.trim()||'carevibe_01';
+  if(!u){alert('Please enter your Firebase Database URL');return;}
+  localStorage.setItem(SK,JSON.stringify({u,d}));
+  devId=d;init(u,d);hide('cfg-modal');updSet(u,d);
+}
+function showCfg(){document.getElementById('cfg-modal').classList.remove('hidden');}
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function updSet(u,d){
+  document.getElementById('s-dev').textContent=d;
+  document.getElementById('s-url').textContent=u;
+}
+
+function init(url,dev){
+  try{if(fbApp)fbApp.delete();}catch(e){}
+  try{
+    fbApp=firebase.initializeApp({databaseURL:url.endsWith('/')?url.slice(0,-1):url},'cv'+Date.now());
+    fbDb=firebase.database(fbApp);
+    setBadge('connecting');
+    fbDb.ref('/carevibe/'+dev+'/latest').on('value',snap=>{
+      const d=snap.val();
+      if(!d){setBadge('offline');return;}
+      setBadge('online');
+      update(d);
+      document.getElementById('rt').textContent='Updated '+new Date().toLocaleTimeString();
+    },()=>setBadge('offline'));
+    fbDb.ref('/carevibe/'+dev+'/alerts').limitToLast(20).on('value',snap=>{
+      aLog=[];snap.forEach(c=>aLog.push(c.val()));aLog.reverse();renderLog();
+    });
+  }catch(e){setBadge('offline');}
+}
+
+function update(d){
+  // Alert
+  const bn=document.getElementById('alert-banner');
+  if(d.alertActive){bn.classList.add('visible');document.getElementById('a-lbl').textContent=d.alertLabel||'ALERT';document.getElementById('i-alert').textContent=aName(d.alertType);document.getElementById('i-alert').style.color='var(--red)';}
+  else{bn.classList.remove('visible');document.getElementById('i-alert').textContent='NONE';document.getElementById('i-alert').style.color='var(--green)';}
+
+  // HR
+  const hr=d.heartRate||0;const hel=document.getElementById('v-hr');
+  if(!d.fingerPresent){hel.textContent='—';setSt('st-hr','◌ NO FINGER','w');}
+  else if(hr===0){hel.textContent='…';setSt('st-hr','● MEASURING','w');}
+  else{hel.textContent=Math.round(hr);hel.style.color='var(--red)';(hr<50||hr>120)?setSt('st-hr','⚠ ABNORMAL','d'):setSt('st-hr','● NORMAL','');animHR(hr);}
+
+  // Temp
+  const t=d.temperature||0;const tel=document.getElementById('v-temp');
+  if(t===0){tel.textContent='—';}
+  else{tel.textContent=t.toFixed(1);t>38?setSt('st-temp','⚠ FEVER','d'):t>37.5?setSt('st-temp','⚠ HIGH','w'):setSt('st-temp','● NORMAL','');}
+
+  // Accel
+  const ac=d.accelMag||0;document.getElementById('v-accel').textContent=ac.toFixed(2);
+  ac>2.5?setSt('st-accel','⚠ FALL!','d'):setSt('st-accel','● STABLE','');
+
+  // Sound
+  const sn=d.soundLevel||0;document.getElementById('v-sound').textContent=sn;animSnd(sn);
+
+  // RSSI
+  const rs=d.wifiRSSI||0;document.getElementById('v-rssi').textContent=rs;
+  rs>-60?setSt('st-rssi','● STRONG',''):rs>-75?setSt('st-rssi','● GOOD','w'):setSt('st-rssi','▼ WEAK','d');
+
+  // GPS
+  if(d.gpsValid&&d.gpsLat!==0){
+    document.getElementById('gps-co').innerHTML='Lat: <b>'+d.gpsLat.toFixed(6)+'</b><br>Lng: <b>'+d.gpsLng.toFixed(6)+'</b>';
+    const mb=document.getElementById('maps-btn');
+    mb.href='https://www.google.com/maps?q='+d.gpsLat+','+d.gpsLng;
+    mb.classList.remove('dis');
+  } else {
+    document.getElementById('gps-co').textContent='Searching for GPS fix… (needs outdoor)';
+    document.getElementById('maps-btn').classList.add('dis');
+  }
+
+  // Info bar
+  document.getElementById('i-uptime').textContent=d.uptimeMs?fmtUp(d.uptimeMs):'—';
+  document.getElementById('i-sats').textContent=d.gpsSatellites||'0';
+  document.getElementById('i-finger').textContent=d.fingerPresent?'YES':'NO';
+}
+
+function renderLog(){
+  const el=document.getElementById('alert-log');
+  if(!aLog||!aLog.length){el.innerHTML='<div class="empty"><div class="ei">✅</div><div class="et">No alerts — all clear!</div></div>';return;}
+  el.innerHTML=aLog.map(a=>{
+    const g=a.gpsValid?'📍 '+a.gpsLat?.toFixed(4)+', '+a.gpsLng?.toFixed(4):'📍 No GPS fix';
+    return '<div class="log-entry"><div class="lt">'+(a.label||aName(a.type))+'</div><div class="lm">Uptime '+fmtUp(a.uptimeMs||0)+' · HR: '+Math.round(a.heartRate||0)+' BPM · Temp: '+(a.temp||0).toFixed(1)+'°C</div><div class="lg">'+g+'</div></div>';
+  }).join('');
+}
+function clearLog(){aLog=[];renderLog();}
+
+function animHR(bpm){
+  document.querySelectorAll('.hb').forEach(b=>{
+    b.style.height=(20+Math.random()*80)+'%';
+    b.style.background=(bpm>100||bpm<55)?'var(--red)':'rgba(255,77,109,0.5)';
+  });
+}
+function animSnd(lv){
+  const r=Math.min(lv/4095,1);
+  document.querySelectorAll('.sb').forEach(b=>{
+    b.style.height=(5+Math.random()*95*r)+'%';
+    b.style.background=lv>3000?'rgba(255,77,109,0.6)':'rgba(0,229,160,0.4)';
+  });
+}
+
+function setBadge(s){
+  const b=document.getElementById('badge'),t=document.getElementById('badge-txt');
+  b.className='badge '+s;t.textContent=s;
+}
+function setSt(id,lbl,type){const e=document.getElementById(id);e.textContent=lbl;e.className='c-stat '+(type||'');}
+function aName(n){return{0:'NONE',1:'LOW HR',2:'HIGH HR',3:'TEMP',4:'FALL',5:'SOUND',6:'SOS'}[n]||'ALERT';}
+function fmtUp(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);return h>0?h+'h '+(m%60)+'m':m>0?m+'m '+(s%60)+'s':s+'s';}
+function showPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(ni=>ni.classList.remove('active'));
+  document.getElementById('page-'+n).classList.add('active');
+  document.getElementById('nav-'+n).classList.add('active');
+}
+</script>
+</body>
+</html>
